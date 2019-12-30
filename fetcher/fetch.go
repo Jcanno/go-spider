@@ -7,22 +7,31 @@ import (
 	"log"
 	"net/http"
 
+	"golang.org/x/net/html/charset"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
-	"golang.org/x/net/html/charset"
 )
 
 // Fetch 根据url获取对应的数据
 func Fetch(url string) ([]byte, error) {
-	resp, err := http.Get(url)
+	/*
+		resp, err := http.Get(url)
+		if err != nil {
+				return nil, err
+		}
+	*/
+	request, _ := http.NewRequest(http.MethodGet, url, nil)
+	request.Header.Add("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1")
+
+	resp, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return nil, err
 	}
-
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		fmt.Println("resp:", resp)
 		return nil, fmt.Errorf("error:status code:%d", resp.StatusCode)
 	}
 
