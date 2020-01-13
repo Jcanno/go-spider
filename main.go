@@ -3,6 +3,7 @@ package main
 import (
 	"spider/engine"
 	"spider/parser"
+	"spider/persist"
 	"spider/scheduler"
 )
 
@@ -22,6 +23,7 @@ func main() {
 		//Scheduler: &scheduler.SimpleScheduler{},
 		Scheduler:   &scheduler.QueuedScheduler{},
 		WorkerCount: 100,
+		ItemChan:    persist.ItemSaver(),
 	}
 	e.Run(engine.Request{
 		URL:        url,

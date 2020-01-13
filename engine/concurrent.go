@@ -17,6 +17,7 @@ type Scheduler interface {
 type ConcurrentEngine struct {
 	Scheduler   Scheduler //Sheduler
 	WorkerCount int       //worker的数量
+	ItemChan    chan interface{}
 }
 
 // Run Run
@@ -72,19 +73,28 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 		e.Scheduler.Submit(r)
 	}
 
-	itemCount := 0
+	// itemCount := 0
 	//从out中获取result，对于item就打印即可，对于request，就继续分配
 	for {
 		result := <-out
+
 		for _, item := range result.Items {
-			log.Printf("Got %d  item : %v", itemCount, item)
-			itemCount++
+			// go func(item interface{}) {
+			// 	e.ItemChan <- item
+			// }(item)
+			// log.Printf("Got %d  item : %v", itemCount, item)
+			// itemCount++
+			go recordItem(e, item)
 		}
 
 		for _, request := range result.Requests {
 			e.Scheduler.Submit(request)
 		}
 	}
+}
+
+func recordItem(e *ConcurrentEngine, item interface{}) {
+	e.ItemChan <- item
 }
 
 // createWorker 创建worker
